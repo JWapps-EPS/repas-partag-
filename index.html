@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Repas partagé</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f7f5f0; min-height: 100vh; }
+    .container { max-width: 520px; margin: 0 auto; padding: 24px 16px 60px; }
+    h1 { font-size: 22px; font-weight: 700; color: #1a1a1a; margin-bottom: 20px; }
+
+    .form { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 28px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 1px 6px rgba(0,0,0,0.07); }
+    .form input, .form select { padding: 11px 12px; border: 1.5px solid #e0dbd3; border-radius: 8px; font-size: 15px; outline: none; background: #faf9f7; width: 100%; }
+    .form button { padding: 12px; background: #e07b39; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; }
+    .form button:disabled { opacity: 0.5; cursor: default; }
+
+    .section { margin-bottom: 20px; }
+    .cat-label { font-size: 11px; font-weight: 700; color: #e07b39; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .row { display: flex; align-items: center; padding: 10px 12px; border-radius: 8px; background: #fff; margin-bottom: 5px; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .row-nom { flex: 1; font-size: 15px; color: #1a1a1a; font-weight: 500; }
+    .row-qui { font-size: 13px; color: #aaa; }
+    .del { background: none; border: none; color: #ccc; cursor: pointer; font-size: 15px; padding: 0 2px; }
+    .del:hover { color: #e07b39; }
+
+    .empty { text-align: center; color: #bbb; padding: 40px 0; font-size: 15px; }
+    .sync { text-align: center; font-size: 11px; color: #ccc; margin-top: 24px; }
+
+    .repas-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .repas-header h1 { margin-bottom: 0; flex: 1; }
+    .btn-back { background: none; border: none; color: #e07b39; font-size: 15px; font-weight: 600; cursor: pointer; padding: 0; }
+
+    /* Écran liste des repas */
+    .repas-card { background: #fff; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; cursor: pointer; box-shadow: 0 1px 6px rgba(0,0,0,0.07); display: flex; align-items: center; gap: 10px; }
+    .repas-card:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.12); }
+    .repas-info { flex: 1; }
+    .repas-nom { font-weight: 700; font-size: 16px; color: #1a1a1a; }
+    .repas-meta { font-size: 13px; color: #888; margin-top: 3px; }
+    .repas-count { font-size: 12px; color: #e07b39; font-weight: 600; margin-top: 4px; }
+    .repas-arrow { color: #ccc; font-size: 18px; }
+    .del-repas { background: none; border: none; color: #ddd; cursor: pointer; font-size: 16px; }
+    .del-repas:hover { color: #e07b39; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ÉCRAN ACCUEIL -->
+  <div id="screen-home">
+    <h1>🍽️ Repas partagés</h1>
+
+    <div class="form" id="form-new-repas">
+      <input id="new-nom" type="text" placeholder="Nom du repas (ex: Pique-nique)" />
+      <input id="new-date" type="date" />
+      <input id="new-lieu" type="text" placeholder="Lieu (facultatif)" />
+      <button onclick="creerRepas()">+ Créer un repas</button>
+    </div>
+
+    <div id="liste-repas"><div class="empty">Chargement…</div></div>
+    <div class="sync">↻ temps réel Firebase</div>
+  </div>
+
+  <!-- ÉCRAN REPAS -->
+  <div id="screen-repas" style="display:none">
+    <div class="repas-header">
+      <button class="btn-back" onclick="retourAccueil()">← Retour</button>
+      <h1 id="titre-repas"></h1>
+    </div>
+    <div id="meta-repas" style="font-size:13px;color:#888;margin-bottom:16px;margin-top:-12px;"></div>
+
+    <div class="form">
+      <input id="plat-qui" type="text" placeholder="Ton prénom" />
+      <select id="plat-cat">
+        <option>🥗 Entrée</option>
+        <option>🍽️ Plat</option>
+        <option>🧁 Dessert</option>
+        <option>🥤 Boisson</option>
+        <option>🍞 Pain</option>
+        <option>🧂 Autre</option>
+      </select>
+      <input id="plat-nom" type="text" placeholder="Ce que tu apportes…" onkeydown="if(event.key==='Enter')ajouterPlat()" />
+      <button onclick="ajouterPlat()">Ajouter</button>
+    </div>
+
+    <div id="liste-plats"><div class="empty">Aucun apport pour l'instant 👆</div></div>
+  </div>
+
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, push, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDsY_QT8r9WIyWahvMxg08AN0tuNlU4uKw",
+    authDomain: "repas-paratge.firebaseapp.com",
+    databaseURL: "https://repas-paratge-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "repas-paratge",
+    storageBucket: "repas-paratge.firebasestorage.app",
+    messagingSenderId: "667169263973",
+    appId: "1:667169263973:web:dc9771a6cd99a33dbb118c"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  const CATS = ["🥗 Entrée","🍽️ Plat","🧁 Dessert","🥤 Boisson","🍞 Pain","🧂 Autre"];
+  let repasActifId = null;
+  let unsubscribePlats = null;
+
+  // ── ACCUEIL ──────────────────────────────────────────────────────────────
+  onValue(ref(db, "repas"), snap => {
+    const data = snap.val() || {};
+    const liste = document.getElementById("liste-repas");
+    const repasArr = Object.entries(data);
+
+    if (repasArr.length === 0) {
+      liste.innerHTML = '<div class="empty">Aucun repas — crée le premier 👆</div>';
+      return;
+    }
+
+    liste.innerHTML = repasArr.map(([id, r]) => {
+      const nb = r.plats ? Object.keys(r.plats).length : 0;
+      const date = r.date ? new Date(r.date).toLocaleDateString("fr-FR", {weekday:"short",day:"numeric",month:"long"}) : "";
+      return `
+        <div class="repas-card" onclick="ouvrirRepas('${id}','${r.nom}','${date}','${r.lieu||''}')">
+          <div class="repas-info">
+            <div class="repas-nom">${r.nom}</div>
+            ${date ? `<div class="repas-meta">${date}${r.lieu ? ' · '+r.lieu : ''}</div>` : ''}
+            <div class="repas-count">${nb} apport${nb !== 1 ? 's' : ''}</div>
+          </div>
+          <span class="repas-arrow">→</span>
+          <button class="del-repas" onclick="event.stopPropagation();supprimerRepas('${id}')">🗑</button>
+        </div>`;
+    }).join("");
+  });
+
+  window.creerRepas = async () => {
+    const nom = document.getElementById("new-nom").value.trim();
+    if (!nom) return;
+    const date = document.getElementById("new-date").value;
+    const lieu = document.getElementById("new-lieu").value.trim();
+    await push(ref(db, "repas"), { nom, date, lieu });
+    document.getElementById("new-nom").value = "";
+    document.getElementById("new-date").value = "";
+    document.getElementById("new-lieu").value = "";
+  };
+
+  window.supprimerRepas = async (id) => {
+    if (!confirm("Supprimer ce repas ?")) return;
+    await remove(ref(db, "repas/" + id));
+  };
+
+  // ── REPAS ────────────────────────────────────────────────────────────────
+  window.ouvrirRepas = (id, nom, date, lieu) => {
+    repasActifId = id;
+    document.getElementById("screen-home").style.display = "none";
+    document.getElementById("screen-repas").style.display = "";
+    document.getElementById("titre-repas").textContent = nom;
+    const meta = [date, lieu ? "📍 " + lieu : ""].filter(Boolean).join(" · ");
+    document.getElementById("meta-repas").textContent = meta;
+
+    if (unsubscribePlats) unsubscribePlats();
+    unsubscribePlats = onValue(ref(db, "repas/" + id + "/plats"), snap => {
+      const data = snap.val() || {};
+      const liste = document.getElementById("liste-plats");
+      const plats = Object.entries(data);
+
+      if (plats.length === 0) {
+        liste.innerHTML = '<div class="empty">Aucun apport pour l\'instant 👆</div>';
+        return;
+      }
+
+      const grouped = {};
+      CATS.forEach(c => {
+        const items = plats.filter(([,p]) => p.cat === c);
+        if (items.length) grouped[c] = items;
+      });
+
+      liste.innerHTML = Object.entries(grouped).map(([cat, items]) => `
+        <div class="section">
+          <div class="cat-label">${cat}</div>
+          ${items.map(([pid, p]) => `
+            <div class="row">
+              <span class="row-nom">${p.nom}</span>
+              <span class="row-qui">${p.qui}</span>
+              <button class="del" onclick="supprimerPlat('${pid}')" title="Supprimer">✕</button>
+            </div>`).join("")}
+        </div>`).join("");
+    });
+  };
+
+  window.retourAccueil = () => {
+    if (unsubscribePlats) { unsubscribePlats(); unsubscribePlats = null; }
+    repasActifId = null;
+    document.getElementById("screen-repas").style.display = "none";
+    document.getElementById("screen-home").style.display = "";
+  };
+
+  window.ajouterPlat = async () => {
+    const nom = document.getElementById("plat-nom").value.trim();
+    const qui = document.getElementById("plat-qui").value.trim();
+    const cat = document.getElementById("plat-cat").value;
+    if (!nom || !qui || !repasActifId) return;
+    await push(ref(db, "repas/" + repasActifId + "/plats"), { nom, qui, cat });
+    document.getElementById("plat-nom").value = "";
+  };
+
+  window.supprimerPlat = async (platId) => {
+    await remove(ref(db, "repas/" + repasActifId + "/plats/" + platId));
+  };
+</script>
+</body>
+</html>
