@@ -8,71 +8,59 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: system-ui, sans-serif; background: #f7f5f0; min-height: 100vh; }
     .container { max-width: 520px; margin: 0 auto; padding: 24px 16px 60px; }
-
-    h1 { font-size: 22px; font-weight: 700; color: #1a1a1a; margin-bottom: 20px; }
-
+    h1 { font-size: 22px; font-weight: 700; color: #1a1a1a; margin-bottom: 0; }
     .card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 20px; box-shadow: 0 1px 6px rgba(0,0,0,0.07); }
-
-    input, select { padding: 11px 12px; border: 1.5px solid #e0dbd3; border-radius: 8px; font-size: 15px; outline: none; background: #faf9f7; width: 100%; margin-bottom: 10px; }
+    input, select { padding: 11px 12px; border: 1.5px solid #e0dbd3; border-radius: 8px; font-size: 15px; outline: none; background: #faf9f7; width: 100%; margin-bottom: 10px; display: block; }
     input:focus, select:focus { border-color: #e07b39; }
-
-    .btn { padding: 12px; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; }
+    .btn { padding: 12px; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; display: block; margin-top: 4px; }
     .btn-orange { background: #e07b39; color: #fff; }
-    .btn-orange:disabled { opacity: 0.4; cursor: default; }
-    .btn-ghost { background: #f0ece6; color: #555; margin-top: 6px; }
-
+    .btn-ghost { background: #f0ece6; color: #555; margin-top: 8px; }
     .section { margin-bottom: 20px; }
     .cat-label { font-size: 11px; font-weight: 700; color: #e07b39; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
     .row { display: flex; align-items: center; padding: 10px 12px; border-radius: 8px; background: #fff; margin-bottom: 5px; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
     .row-nom { flex: 1; font-size: 15px; color: #1a1a1a; font-weight: 500; }
     .row-qui { font-size: 13px; color: #aaa; white-space: nowrap; }
-    .del { background: none; border: none; color: #ddd; cursor: pointer; font-size: 15px; padding: 0 2px; }
+    .del { background: none; border: none; color: #ddd; cursor: pointer; font-size: 15px; padding: 0 4px; }
     .del:hover { color: #e07b39; }
-
-    .repas-card { background: #fff; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; cursor: pointer; box-shadow: 0 1px 6px rgba(0,0,0,0.07); display: flex; align-items: center; gap: 10px; transition: box-shadow .15s; }
+    .repas-card { background: #fff; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; cursor: pointer; box-shadow: 0 1px 6px rgba(0,0,0,0.07); display: flex; align-items: center; gap: 10px; }
     .repas-card:hover { box-shadow: 0 3px 12px rgba(0,0,0,0.12); }
     .repas-info { flex: 1; }
     .repas-nom { font-weight: 700; font-size: 16px; color: #1a1a1a; }
     .repas-meta { font-size: 13px; color: #888; margin-top: 3px; }
     .repas-count { font-size: 12px; color: #e07b39; font-weight: 600; margin-top: 4px; }
-    .repas-arrow { color: #ccc; font-size: 18px; }
     .del-repas { background: none; border: none; color: #ddd; cursor: pointer; font-size: 16px; }
     .del-repas:hover { color: #e07b39; }
-
     .empty { text-align: center; color: #bbb; padding: 32px 0; font-size: 15px; line-height: 1.6; }
     .sync { text-align: center; font-size: 11px; color: #ccc; margin-top: 24px; }
-
-    .header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-    .header h1 { margin-bottom: 0; flex: 1; }
-    .btn-back { background: none; border: none; color: #e07b39; font-size: 15px; font-weight: 600; cursor: pointer; padding: 0; white-space: nowrap; }
-    .meta { font-size: 13px; color: #888; margin-bottom: 16px; }
-
-    .admin-badge { font-size: 11px; background: #e07b39; color: #fff; padding: 3px 8px; border-radius: 20px; font-weight: 600; }
     .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .btn-admin-link { background: none; border: none; color: #ccc; font-size: 12px; cursor: pointer; text-decoration: underline; }
-
-    /* Modal code admin */
-    .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .admin-badge { font-size: 11px; background: #e07b39; color: #fff; padding: 3px 10px; border-radius: 20px; font-weight: 600; display: none; }
+    .btn-admin-link { background: none; border: none; color: #ccc; font-size: 12px; cursor: pointer; text-decoration: underline; padding: 0; }
+    .page-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .page-header h1 { flex: 1; }
+    .btn-back { background: none; border: none; color: #e07b39; font-size: 15px; font-weight: 600; cursor: pointer; padding: 0; }
+    .meta { font-size: 13px; color: #888; margin-bottom: 16px; }
+    .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 100; }
+    .modal-bg.open { display: flex; }
     .modal { background: #fff; border-radius: 16px; padding: 28px 24px; width: 300px; text-align: center; }
     .modal h2 { font-size: 18px; margin-bottom: 6px; }
     .modal p { font-size: 14px; color: #888; margin-bottom: 16px; }
-    .modal input { text-align: center; font-size: 22px; letter-spacing: 8px; }
-    .modal .err { color: #e07b39; font-size: 13px; margin-top: -4px; margin-bottom: 8px; }
+    .modal input { text-align: center; font-size: 24px; letter-spacing: 10px; }
+    .err { color: #e07b39; font-size: 13px; margin-bottom: 8px; display: none; }
+    #form-new-repas { display: none; }
+    #screen-repas { display: none; }
   </style>
 </head>
 <body>
 <div class="container">
 
-  <!-- ÉCRAN ACCUEIL -->
   <div id="screen-home">
     <div class="top-bar">
       <h1>🍽️ Repas partagés</h1>
-      <span id="badge-admin" style="display:none" class="admin-badge">Admin</span>
-      <button id="btn-admin-link" class="btn-admin-link" onclick="ouvrirModalAdmin()">Admin</button>
+      <span id="badge-admin" class="admin-badge">Admin</span>
+      <button id="btn-admin-link" class="btn-admin-link" onclick="ouvrirModal()">Admin</button>
     </div>
 
-    <!-- Formulaire création repas (admin seulement) -->
-    <div id="form-new-repas" class="card" style="display:none">
+    <div id="form-new-repas" class="card">
       <input id="new-nom" type="text" placeholder="Nom du repas (ex: Pique-nique)" />
       <input id="new-date" type="date" />
       <input id="new-lieu" type="text" placeholder="Lieu (facultatif)" />
@@ -83,14 +71,12 @@
     <div class="sync">↻ temps réel</div>
   </div>
 
-  <!-- ÉCRAN REPAS -->
-  <div id="screen-repas" style="display:none">
-    <div class="header">
+  <div id="screen-repas">
+    <div class="page-header">
       <button class="btn-back" onclick="retourAccueil()">← Retour</button>
       <h1 id="titre-repas"></h1>
     </div>
     <div id="meta-repas" class="meta"></div>
-
     <div class="card">
       <input id="plat-qui" type="text" placeholder="Ton prénom" />
       <select id="plat-cat">
@@ -104,30 +90,28 @@
       <input id="plat-nom" type="text" placeholder="Ce que tu apportes…" onkeydown="if(event.key==='Enter')ajouterPlat()" />
       <button class="btn btn-orange" onclick="ajouterPlat()">Ajouter</button>
     </div>
-
     <div id="liste-plats"><div class="empty">Aucun apport pour l'instant 👆</div></div>
   </div>
 
 </div>
 
-<!-- MODAL ADMIN -->
-<div id="modal-admin" class="modal-bg" style="display:none">
+<div id="modal-admin" class="modal-bg">
   <div class="modal">
     <h2>🔐 Accès admin</h2>
-    <p>Entre le code pour créer et gérer les repas</p>
-    <input id="code-input" type="password" placeholder="••••" maxlength="4"
-      onkeydown="if(event.key==='Enter')validerCode()" autofocus />
-    <div id="code-err" class="err" style="display:none">Code incorrect</div>
+    <p>Entre le code pour gérer les repas</p>
+    <input id="code-input" type="password" placeholder="••••" maxlength="4" onkeydown="if(event.key==='Enter')validerCode()" />
+    <div id="code-err" class="err">Code incorrect !</div>
     <button class="btn btn-orange" onclick="validerCode()">Valider</button>
     <button class="btn btn-ghost" onclick="fermerModal()">Annuler</button>
   </div>
 </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, push, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+window.onload = function() {
 
-  const firebaseConfig = {
+  firebase.initializeApp({
     apiKey: "AIzaSyDsY_QT8r9WIyWahvMxg08AN0tuNlU4uKw",
     authDomain: "repas-paratge.firebaseapp.com",
     databaseURL: "https://repas-paratge-default-rtdb.europe-west1.firebasedatabase.app",
@@ -135,151 +119,150 @@
     storageBucket: "repas-paratge.firebasestorage.app",
     messagingSenderId: "667169263973",
     appId: "1:667169263973:web:dc9771a6cd99a33dbb118c"
-  };
+  });
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+  var db = firebase.database();
+  var CATS = ["🥗 Entrée","🍽️ Plat","🧁 Dessert","🥤 Boisson","🍞 Pain","🧂 Autre"];
+  var CODE = "1234";
+  var isAdmin = false;
+  var repasActifId = null;
+  var unsubPlats = null;
 
-  const CATS = ["🥗 Entrée","🍽️ Plat","🧁 Dessert","🥤 Boisson","🍞 Pain","🧂 Autre"];
-  const CODE_ADMIN = "1234";
-
-  let isAdmin = false;
-  let repasActifId = null;
-  let unsubPlats = null;
-
-  function appliquerAdmin() {
-    document.getElementById("form-new-repas").style.display = isAdmin ? "" : "none";
-    document.getElementById("badge-admin").style.display = isAdmin ? "" : "none";
-    document.getElementById("btn-admin-link").style.display = isAdmin ? "none" : "";
-  }
-  appliquerAdmin();
-
-  // ── Modal ────────────────────────────────────────────────────────────────
-  window.ouvrirModalAdmin = () => {
-    document.getElementById("modal-admin").style.display = "flex";
+  // ── Modal admin ──────────────────────────────────────────────────────────
+  window.ouvrirModal = function() {
     document.getElementById("code-input").value = "";
     document.getElementById("code-err").style.display = "none";
-    setTimeout(() => document.getElementById("code-input").focus(), 100);
+    document.getElementById("modal-admin").classList.add("open");
+    setTimeout(function(){ document.getElementById("code-input").focus(); }, 100);
   };
-  window.fermerModal = () => {
-    document.getElementById("modal-admin").style.display = "none";
+  window.fermerModal = function() {
+    document.getElementById("modal-admin").classList.remove("open");
   };
-  window.validerCode = () => {
-    const code = document.getElementById("code-input").value;
-    if (code === CODE_ADMIN) {
+  window.validerCode = function() {
+    if (document.getElementById("code-input").value === CODE) {
       isAdmin = true;
-
       fermerModal();
-      appliquerAdmin();
+      document.getElementById("form-new-repas").style.display = "";
+      document.getElementById("badge-admin").style.display = "";
+      document.getElementById("btn-admin-link").style.display = "none";
     } else {
       document.getElementById("code-err").style.display = "";
       document.getElementById("code-input").value = "";
     }
   };
 
-  // ── Accueil ──────────────────────────────────────────────────────────────
-  onValue(ref(db, "repas"), snap => {
-    const data = snap.val() || {};
-    const liste = document.getElementById("liste-repas");
-    const repasArr = Object.entries(data);
-
-    if (repasArr.length === 0) {
+  // ── Liste repas ──────────────────────────────────────────────────────────
+  db.ref("repas").on("value", function(snap) {
+    var data = snap.val() || {};
+    var liste = document.getElementById("liste-repas");
+    var arr = Object.entries(data);
+    if (arr.length === 0) {
       liste.innerHTML = '<div class="empty">Aucun repas pour l\'instant.</div>';
       return;
     }
-
-    liste.innerHTML = repasArr.map(([id, r]) => {
-      const nb = r.plats ? Object.keys(r.plats).length : 0;
-      const date = r.date ? new Date(r.date).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"long"}) : "";
-      const delBtn = isAdmin ? `<button class="del-repas" onclick="event.stopPropagation();supprimerRepas('${id}')" title="Supprimer">🗑</button>` : "";
-      return `
-        <div class="repas-card" onclick="ouvrirRepas('${id}','${r.nom}','${date}','${r.lieu||''}')">
-          <div class="repas-info">
-            <div class="repas-nom">${r.nom}</div>
-            ${date ? `<div class="repas-meta">${date}${r.lieu?' · '+r.lieu:''}</div>` : ''}
-            <div class="repas-count">${nb} apport${nb!==1?'s':''}</div>
-          </div>
-          <span class="repas-arrow">→</span>
-          ${delBtn}
-        </div>`;
+    liste.innerHTML = arr.map(function(entry) {
+      var id = entry[0], r = entry[1];
+      var nb = r.plats ? Object.keys(r.plats).length : 0;
+      var date = r.date ? new Date(r.date).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"long"}) : "";
+      var lieu = r.lieu || "";
+      var delBtn = isAdmin
+        ? '<button class="del-repas" onclick="event.stopPropagation();supprimerRepas(\''+id+'\')" title="Supprimer">🗑</button>'
+        : "";
+      return '<div class="repas-card" onclick="ouvrirRepas(\''+id+'\',\''+encodeURIComponent(r.nom)+'\',\''+encodeURIComponent(date)+'\',\''+encodeURIComponent(lieu)+'\')">'
+        +'<div class="repas-info">'
+          +'<div class="repas-nom">'+r.nom+'</div>'
+          +(date ? '<div class="repas-meta">'+date+(lieu ? ' · '+lieu : '')+'</div>' : '')
+          +'<div class="repas-count">'+nb+' apport'+(nb!==1?'s':'')+'</div>'
+        +'</div>'
+        +'<span style="color:#ccc;font-size:18px;margin-right:4px">→</span>'
+        +delBtn
+      +'</div>';
     }).join("");
   });
 
-  window.creerRepas = async () => {
+  window.creerRepas = function() {
     if (!isAdmin) return;
-    const nom = document.getElementById("new-nom").value.trim();
+    var nom = document.getElementById("new-nom").value.trim();
     if (!nom) return;
-    const date = document.getElementById("new-date").value;
-    const lieu = document.getElementById("new-lieu").value.trim();
-    await push(ref(db, "repas"), { nom, date, lieu });
+    db.ref("repas").push({
+      nom: nom,
+      date: document.getElementById("new-date").value,
+      lieu: document.getElementById("new-lieu").value.trim()
+    });
     document.getElementById("new-nom").value = "";
     document.getElementById("new-date").value = "";
     document.getElementById("new-lieu").value = "";
   };
 
-  window.supprimerRepas = async (id) => {
+  window.supprimerRepas = function(id) {
     if (!isAdmin || !confirm("Supprimer ce repas ?")) return;
-    await remove(ref(db, "repas/" + id));
+    db.ref("repas/"+id).remove();
   };
 
-  // ── Repas ────────────────────────────────────────────────────────────────
-  window.ouvrirRepas = (id, nom, date, lieu) => {
+  // ── Écran repas ──────────────────────────────────────────────────────────
+  window.ouvrirRepas = function(id, nom, date, lieu) {
     repasActifId = id;
+    nom = decodeURIComponent(nom);
+    date = decodeURIComponent(date);
+    lieu = decodeURIComponent(lieu);
     document.getElementById("screen-home").style.display = "none";
     document.getElementById("screen-repas").style.display = "";
     document.getElementById("titre-repas").textContent = nom;
-    const meta = [date, lieu ? "📍 "+lieu : ""].filter(Boolean).join(" · ");
-    document.getElementById("meta-repas").textContent = meta;
+    document.getElementById("meta-repas").textContent = [date, lieu ? "📍 "+lieu : ""].filter(Boolean).join(" · ");
 
-    if (unsubPlats) unsubPlats();
-    unsubPlats = onValue(ref(db, "repas/"+id+"/plats"), snap => {
-      const data = snap.val() || {};
-      const liste = document.getElementById("liste-plats");
-      const plats = Object.entries(data);
-
+    if (unsubPlats) { unsubPlats(); unsubPlats = null; }
+    var r = db.ref("repas/"+id+"/plats");
+    var h = r.on("value", function(snap) {
+      var data = snap.val() || {};
+      var liste = document.getElementById("liste-plats");
+      var plats = Object.entries(data);
       if (plats.length === 0) {
         liste.innerHTML = '<div class="empty">Aucun apport pour l\'instant 👆</div>';
         return;
       }
-
-      const grouped = {};
-      CATS.forEach(c => {
-        const items = plats.filter(([,p]) => p.cat === c);
+      var grouped = {};
+      CATS.forEach(function(c) {
+        var items = plats.filter(function(e){ return e[1].cat === c; });
         if (items.length) grouped[c] = items;
       });
-
-      liste.innerHTML = Object.entries(grouped).map(([cat, items]) => `
-        <div class="section">
-          <div class="cat-label">${cat}</div>
-          ${items.map(([pid, p]) => `
-            <div class="row">
-              <span class="row-nom">${p.nom}</span>
-              <span class="row-qui">${p.qui}</span>
-              <button class="del" onclick="supprimerPlat('${pid}')" title="Supprimer">✕</button>
-            </div>`).join("")}
-        </div>`).join("");
+      liste.innerHTML = Object.entries(grouped).map(function(g) {
+        return '<div class="section">'
+          +'<div class="cat-label">'+g[0]+'</div>'
+          +g[1].map(function(e){
+            return '<div class="row">'
+              +'<span class="row-nom">'+e[1].nom+'</span>'
+              +'<span class="row-qui">'+e[1].qui+'</span>'
+              +'<button class="del" onclick="supprimerPlat(\''+e[0]+'\')">✕</button>'
+            +'</div>';
+          }).join("")
+        +'</div>';
+      }).join("");
     });
+    unsubPlats = function(){ r.off("value", h); };
   };
 
-  window.retourAccueil = () => {
+  window.retourAccueil = function() {
     if (unsubPlats) { unsubPlats(); unsubPlats = null; }
     repasActifId = null;
     document.getElementById("screen-repas").style.display = "none";
     document.getElementById("screen-home").style.display = "";
   };
 
-  window.ajouterPlat = async () => {
-    const nom = document.getElementById("plat-nom").value.trim();
-    const qui = document.getElementById("plat-qui").value.trim();
-    const cat = document.getElementById("plat-cat").value;
+  window.ajouterPlat = function() {
+    var nom = document.getElementById("plat-nom").value.trim();
+    var qui = document.getElementById("plat-qui").value.trim();
+    var cat = document.getElementById("plat-cat").value;
     if (!nom || !qui || !repasActifId) return;
-    await push(ref(db, "repas/"+repasActifId+"/plats"), { nom, qui, cat });
+    db.ref("repas/"+repasActifId+"/plats").push({ nom:nom, qui:qui, cat:cat });
     document.getElementById("plat-nom").value = "";
   };
 
-  window.supprimerPlat = async (platId) => {
-    await remove(ref(db, "repas/"+repasActifId+"/plats/"+platId));
+  window.supprimerPlat = function(platId) {
+    if (!repasActifId) return;
+    db.ref("repas/"+repasActifId+"/plats/"+platId).remove();
   };
+
+}; // fin window.onload
 </script>
 </body>
 </html>
