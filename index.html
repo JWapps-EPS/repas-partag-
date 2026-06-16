@@ -36,7 +36,7 @@
     .admin-badge { font-size: 11px; background: #e07b39; color: #fff; padding: 3px 10px; border-radius: 20px; font-weight: 600; display: none; }
     .btn-admin-link { background: none; border: none; color: #ccc; font-size: 12px; cursor: pointer; text-decoration: underline; padding: 0; }
     .page-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
-    .page-header h1 { flex: 1; }
+    .page-header h1 { flex: 1; font-size: 18px; }
     .btn-back { background: none; border: none; color: #e07b39; font-size: 15px; font-weight: 600; cursor: pointer; padding: 0; }
     .meta { font-size: 13px; color: #888; margin-bottom: 16px; }
     .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 100; }
@@ -104,17 +104,15 @@
 </div>
 
 <script>
-  // ── Config ───────────────────────────────────────────────────────────────
   var DB = "https://repas-paratge-default-rtdb.europe-west1.firebasedatabase.app";
   var CATS = ["🥗 Entrée","🍽️ Plat","🧁 Dessert","🥤 Boisson","🍞 Pain","🧂 Autre"];
   var CODE = "1234";
   var isAdmin = false;
   var repasActifId = null;
-  var tousLesRepas = {};
+  var repasActifData = null;
   var timerAccueil = null;
   var timerRepas = null;
 
-  // ── Helpers REST Firebase ────────────────────────────────────────────────
   function get(path) {
     return fetch(DB + path + ".json").then(function(r){ return r.json(); });
   }
@@ -142,7 +140,7 @@
       document.getElementById("form-new-repas").style.display = "";
       document.getElementById("badge-admin").style.display = "";
       document.getElementById("btn-admin-link").style.display = "none";
-      afficherListeRepas();
+      chargerRepas();
     } else {
       document.getElementById("code-err").style.display = "";
       document.getElementById("code-input").value = "";
@@ -152,54 +150,60 @@
   // ── Accueil ──────────────────────────────────────────────────────────────
   function chargerRepas() {
     get("/repas").then(function(data) {
-      tousLesRepas = data || {};
-      afficherListeRepas();
-    });
-  }
-
-  function afficherListeRepas() {
-    var liste = document.getElementById("liste-repas");
-    var arr = Object.entries(tousLesRepas);
-    if (arr.length === 0) {
-      liste.innerHTML = '<div class="empty">Aucun repas pour l\'instant.</div>';
-      return;
-    }
-    liste.innerHTML = "";
-    arr.forEach(function(entry) {
-      var id = entry[0], r = entry[1];
-      var nb = r.plats ? Object.keys(r.plats).length : 0;
-      var date = r.date ? new Date(r.date).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"long"}) : "";
-
-      var card = document.createElement("div");
-      card.className = "repas-card";
-      card.addEventListener("click", function() { ouvrirRepas(id); });
-
-      var info = document.createElement("div");
-      info.className = "repas-info";
-      info.innerHTML = '<div class="repas-nom">'+r.nom+'</div>'
-        +(date ? '<div class="repas-meta">'+date+(r.lieu?' · '+r.lieu:'')+'</div>' : '')
-        +'<div class="repas-count">'+nb+' apport'+(nb!==1?'s':'')+'</div>';
-
-      var arrow = document.createElement("span");
-      arrow.textContent = "→";
-      arrow.style.cssText = "color:#ccc;font-size:18px";
-
-      card.appendChild(info);
-      card.appendChild(arrow);
-
-      if (isAdmin) {
-        var delBtn = document.createElement("button");
-        delBtn.className = "del-repas";
-        delBtn.textContent = "🗑";
-        delBtn.addEventListener("click", function(e) {
-          e.stopPropagation();
-          if (confirm("Supprimer ce repas ?")) {
-            del("/repas/"+id).then(chargerRepas);
-          }
-        });
-        card.appendChild(delBtn);
+      var liste = document.getElementById("liste-repas");
+      var obj = data || {};
+      var arr = Object.entries(obj);
+      if (arr.length === 0) {
+        liste.innerHTML = '<div class="empty">Aucun repas pour l\'instant.</div>';
+        return;
       }
-      liste.appendChild(card);
+      liste.innerHTML = "";
+      arr.forEach(function(entry) {
+        var id = entry[0];
+        var r = entry[1];
+        var nb = r.plats ? Object.keys(r.plats).length : 0;
+        var date = r.date ? new Date(r.date).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"long"}) : "";
+
+        var card = document.createElement("div");
+        card.className = "repas-card";
+
+        // Stocker les données sur l'élément pour y accéder au clic
+        card._repasId = id;
+        card._repasData = r;
+
+        card.addEventListener("click", function() {
+          ouvrirRepas(card._repasId, card._repasData);
+        });
+
+        var info = document.createElement("div");
+        info.className = "repas-info";
+        info.innerHTML =
+          '<div class="repas-nom">' + r.nom + '</div>' +
+          (date ? '<div class="repas-meta">' + date + (r.lieu ? ' · ' + r.lieu : '') + '</div>' : '') +
+          '<div class="repas-count">' + nb + ' apport' + (nb !== 1 ? 's' : '') + '</div>';
+
+        var arrow = document.createElement("span");
+        arrow.textContent = "→";
+        arrow.style.cssText = "color:#ccc;font-size:18px";
+
+        card.appendChild(info);
+        card.appendChild(arrow);
+
+        if (isAdmin) {
+          var delBtn = document.createElement("button");
+          delBtn.className = "del-repas";
+          delBtn.textContent = "🗑";
+          delBtn.addEventListener("click", function(e) {
+            e.stopPropagation();
+            if (confirm("Supprimer ce repas ?")) {
+              del("/repas/" + id).then(chargerRepas);
+            }
+          });
+          card.appendChild(delBtn);
+        }
+
+        liste.appendChild(card);
+      });
     });
   }
 
@@ -220,17 +224,16 @@
   }
 
   // ── Écran repas ──────────────────────────────────────────────────────────
-  function ouvrirRepas(id) {
-    var r = tousLesRepas[id];
-    if (!r) return;
+  function ouvrirRepas(id, r) {
     repasActifId = id;
-
+    repasActifData = r;
     clearInterval(timerAccueil);
+
     document.getElementById("screen-home").style.display = "none";
     document.getElementById("screen-repas").style.display = "";
     document.getElementById("titre-repas").textContent = r.nom;
     var date = r.date ? new Date(r.date).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"long"}) : "";
-    document.getElementById("meta-repas").textContent = [date, r.lieu ? "📍 "+r.lieu : ""].filter(Boolean).join(" · ");
+    document.getElementById("meta-repas").textContent = [date, r.lieu ? "📍 " + r.lieu : ""].filter(Boolean).join(" · ");
 
     chargerPlats();
     timerRepas = setInterval(chargerPlats, 5000);
@@ -238,7 +241,7 @@
 
   function chargerPlats() {
     if (!repasActifId) return;
-    get("/repas/"+repasActifId+"/plats").then(function(data) {
+    get("/repas/" + repasActifId + "/plats").then(function(data) {
       var liste = document.getElementById("liste-plats");
       var plats = Object.entries(data || {});
       if (plats.length === 0) {
@@ -263,9 +266,11 @@
           var quiEl = document.createElement("span"); quiEl.className = "row-qui"; quiEl.textContent = p.qui;
           var delEl = document.createElement("button"); delEl.className = "del"; delEl.textContent = "✕";
           delEl.addEventListener("click", function() {
-            del("/repas/"+repasActifId+"/plats/"+pid).then(chargerPlats);
+            del("/repas/" + repasActifId + "/plats/" + pid).then(chargerPlats);
           });
-          row.appendChild(nomEl); row.appendChild(quiEl); row.appendChild(delEl);
+          row.appendChild(nomEl);
+          row.appendChild(quiEl);
+          row.appendChild(delEl);
           section.appendChild(row);
         });
         liste.appendChild(section);
@@ -276,6 +281,7 @@
   function retourAccueil() {
     clearInterval(timerRepas);
     repasActifId = null;
+    repasActifData = null;
     document.getElementById("screen-repas").style.display = "none";
     document.getElementById("screen-home").style.display = "";
     chargerRepas();
@@ -287,7 +293,7 @@
     var qui = document.getElementById("plat-qui").value.trim();
     var cat = document.getElementById("plat-cat").value;
     if (!nom || !qui || !repasActifId) return;
-    post("/repas/"+repasActifId+"/plats", { nom:nom, qui:qui, cat:cat }).then(function() {
+    post("/repas/" + repasActifId + "/plats", { nom:nom, qui:qui, cat:cat }).then(function() {
       document.getElementById("plat-nom").value = "";
       chargerPlats();
     });
