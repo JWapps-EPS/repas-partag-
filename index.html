@@ -20,10 +20,6 @@
     .row-nom{flex:1;font-size:15px;color:#1a1a1a;font-weight:500}
     .row-qui{font-size:13px;color:#aaa}
     .del{background:none;border:none;color:#ddd;cursor:pointer;font-size:15px;padding:0 4px}
-    .repas-card{background:#fff;border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 6px rgba(0,0,0,.07);display:flex;align-items:center;gap:10px}
-    .repas-nom{font-weight:700;font-size:16px;color:#1a1a1a}
-    .repas-meta{font-size:13px;color:#888;margin-top:3px}
-    .repas-count{font-size:12px;color:#e07b39;font-weight:600;margin-top:4px}
     .empty{text-align:center;color:#bbb;padding:32px 0;font-size:15px}
     .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
     .admin-badge{font-size:11px;background:#e07b39;color:#fff;padding:3px 10px;border-radius:20px;font-weight:600;display:none}
@@ -59,7 +55,6 @@
       <button class="btn btn-orange" onclick="creerRepas()">+ Créer ce repas</button>
     </div>
     <div id="liste-repas"><div class="empty">Chargement…</div></div>
-    <div style="text-align:center;font-size:11px;color:#ccc;margin-top:16px">↻ actualisation toutes les 5 s</div>
   </div>
 
   <div id="screen-repas">
@@ -129,73 +124,61 @@ function validerCode(){
   }
 }
 
+// Table globale id -> données repas
+var repasData={};
+
 function chargerRepas(){
   get("/repas").then(function(data){
+    repasData=data||{};
     var liste=document.getElementById("liste-repas");
-    if(!data){liste.innerHTML='<div class="empty">Aucun repas pour l\'instant.</div>';return;}
-    var ids=Object.keys(data);
-    if(ids.length===0){liste.innerHTML='<div class="empty">Aucun repas pour l\'instant.</div>';return;}
+    var ids=Object.keys(repasData);
+    if(ids.length===0){
+      liste.innerHTML='<div class="empty">Aucun repas pour l\'instant.</div>';
+      return;
+    }
     liste.innerHTML="";
     ids.forEach(function(id){
-      var r=data[id];
+      var r=repasData[id];
       var nb=r.plats?Object.keys(r.plats).length:0;
       var date=r.date?new Date(r.date+"T12:00:00").toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"long"}):"";
 
-      // Bouton principal cliquable
-      var btn=document.createElement("button");
-      btn.style.cssText="width:100%;background:#fff;border:none;border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 6px rgba(0,0,0,.07);display:flex;align-items:center;gap:10px;cursor:pointer;text-align:left";
-
-      var info=document.createElement("div");
-      info.style.cssText="flex:1";
-      info.innerHTML='<div style="font-weight:700;font-size:16px;color:#1a1a1a">'+r.nom+'</div>'
+      var tr=document.createElement("table");
+      tr.style.cssText="width:100%;background:#fff;border-radius:12px;margin-bottom:10px;box-shadow:0 1px 6px rgba(0,0,0,.07);border-collapse:collapse;cursor:pointer";
+      tr.innerHTML='<tr><td style="padding:14px 16px">'
+        +'<div style="font-weight:700;font-size:16px;color:#1a1a1a">'+r.nom+'</div>'
         +(date?'<div style="font-size:13px;color:#888;margin-top:3px">'+date+(r.lieu?' · '+r.lieu:'')+'</div>':'')
-        +'<div style="font-size:12px;color:#e07b39;font-weight:600;margin-top:4px">'+nb+' apport'+(nb!==1?'s':'')+'</div>';
+        +'<div style="font-size:12px;color:#e07b39;font-weight:600;margin-top:4px">'+nb+' apport'+(nb!==1?'s':'')+'</div>'
+        +'</td><td style="padding:14px;color:#ccc;font-size:20px;white-space:nowrap">→</td></tr>';
 
-      var arrow=document.createElement("span");
-      arrow.textContent="→";
-      arrow.style.cssText="color:#ccc;font-size:18px";
+      // onclick inline sur la table avec l'id en dur
+      tr.setAttribute("onclick","entrerRepas('"+id+"')");
 
-      btn.appendChild(info);
-      btn.appendChild(arrow);
-
-      // Closure propre sur id et r
-      (function(rid, rdata){
-        btn.addEventListener("click", function(){
-          ouvrirRepas(rid, rdata);
-        });
-      })(id, r);
-
-      liste.appendChild(btn);
+      liste.appendChild(tr);
 
       if(isAdmin){
-        var delBtn=document.createElement("button");
-        delBtn.textContent="🗑 Supprimer ce repas";
-        delBtn.style.cssText="display:block;width:100%;background:none;border:1px solid #eee;border-radius:8px;padding:6px;font-size:12px;color:#ccc;cursor:pointer;margin-top:-6px;margin-bottom:10px";
-        (function(rid){
-          delBtn.addEventListener("click",function(){
-            if(confirm("Supprimer ce repas ?")){del("/repas/"+rid).then(chargerRepas);}
-          });
-        })(id);
-        liste.appendChild(delBtn);
+        var d=document.createElement("button");
+        d.textContent="🗑 Supprimer";
+        d.style.cssText="display:block;width:100%;background:none;border:1px solid #eee;border-radius:8px;padding:6px;font-size:12px;color:#aaa;cursor:pointer;margin-top:-6px;margin-bottom:10px";
+        d.setAttribute("onclick","supprimerRepas('"+id+"')");
+        liste.appendChild(d);
       }
     });
   });
 }
 
-function creerRepas(){
-  if(!isAdmin) return;
-  var nom=document.getElementById("new-nom").value.trim();
-  if(!nom) return;
-  post("/repas",{nom:nom,date:document.getElementById("new-date").value,lieu:document.getElementById("new-lieu").value.trim()})
-    .then(function(){
-      document.getElementById("new-nom").value="";
-      document.getElementById("new-date").value="";
-      document.getElementById("new-lieu").value="";
-      chargerRepas();
-    });
+// Appelée depuis onclick inline — id est une string brute
+function entrerRepas(id){
+  alert("clic sur : "+id);  // DEBUG — à enlever après vérif
+  var r=repasData[id];
+  if(!r){alert("données introuvables pour "+id);return;}
+  ouvrirRepas(id,r);
 }
 
-function ouvrirRepas(id, r){
+function supprimerRepas(id){
+  if(confirm("Supprimer ce repas ?")){del("/repas/"+id).then(chargerRepas);}
+}
+
+function ouvrirRepas(id,r){
   repasActifId=id;
   clearInterval(timerAccueil);
   document.getElementById("screen-home").style.display="none";
@@ -226,17 +209,17 @@ function chargerPlats(){
         var n=document.createElement("span"); n.className="row-nom"; n.textContent=p.nom;
         var q=document.createElement("span"); q.className="row-qui"; q.textContent=p.qui;
         var d=document.createElement("button"); d.className="del"; d.textContent="✕";
-        (function(ppid){
-          d.addEventListener("click",function(){
-            del("/repas/"+repasActifId+"/plats/"+ppid).then(chargerPlats);
-          });
-        })(pid);
+        d.setAttribute("onclick","supprimerPlat('"+pid+"')");
         row.appendChild(n); row.appendChild(q); row.appendChild(d);
         sec.appendChild(row);
       });
       liste.appendChild(sec);
     });
   });
+}
+
+function supprimerPlat(pid){
+  del("/repas/"+repasActifId+"/plats/"+pid).then(chargerPlats);
 }
 
 function retourAccueil(){
@@ -257,6 +240,19 @@ function ajouterPlat(){
     document.getElementById("plat-nom").value="";
     chargerPlats();
   });
+}
+
+function creerRepas(){
+  if(!isAdmin) return;
+  var nom=document.getElementById("new-nom").value.trim();
+  if(!nom) return;
+  post("/repas",{nom:nom,date:document.getElementById("new-date").value,lieu:document.getElementById("new-lieu").value.trim()})
+    .then(function(){
+      document.getElementById("new-nom").value="";
+      document.getElementById("new-date").value="";
+      document.getElementById("new-lieu").value="";
+      chargerRepas();
+    });
 }
 
 chargerRepas();
