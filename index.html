@@ -38,7 +38,6 @@
     #form-new-repas{display:none}
     #screen-repas{display:none}
     .repas-btn{width:100%;background:#fff;border:none;border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 6px rgba(0,0,0,.07);cursor:pointer;text-align:left;display:block}
-    .repas-btn:active{background:#f5f3ef}
   </style>
 </head>
 <body>
@@ -101,9 +100,8 @@ var CODE="1234";
 var isAdmin=false;
 var repasActifId=null;
 var timerRepas=null;
-
-// Stockage global indexé par id — alimenté une seule fois
-var RDB={};
+// Tableau ordonné des repas [{id, data}, ...]
+var listeRepas=[];
 
 function get(p){return fetch(DB+p+".json").then(function(r){return r.json();});}
 function post(p,d){return fetch(DB+p+".json",{method:"POST",body:JSON.stringify(d)}).then(function(r){return r.json();});}
@@ -130,18 +128,21 @@ function validerCode(){
 
 function chargerRepas(){
   get("/repas").then(function(data){
-    RDB=data||{};
-    var ids=Object.keys(RDB);
+    // Stocker dans tableau ordonné
+    listeRepas=[];
+    if(data){
+      Object.keys(data).forEach(function(id){
+        listeRepas.push({id:id, r:data[id]});
+      });
+    }
     var liste=document.getElementById("liste-repas");
-    if(ids.length===0){
+    if(listeRepas.length===0){
       liste.innerHTML='<div class="empty">Aucun repas pour l\'instant.</div>';
       return;
     }
-    // Construire le HTML entièrement avec onclick="entrerRepas(index)"
-    // On passe l'index numérique pour éviter tout pb de caractères dans l'id Firebase
     var html="";
-    ids.forEach(function(id,i){
-      var r=RDB[id];
+    listeRepas.forEach(function(item,i){
+      var r=item.r;
       var nb=r.plats?Object.keys(r.plats).length:0;
       var date=r.date?new Date(r.date+"T12:00:00").toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"long"}):"";
       html+='<button class="repas-btn" onclick="entrerRepas('+i+')">'
@@ -162,12 +163,11 @@ function chargerRepas(){
   });
 }
 
-// Entrée par index dans RDB
 function entrerRepas(i){
-  var ids=Object.keys(RDB);
-  var id=ids[i];
-  var r=RDB[id];
-  repasActifId=id;
+  var item=listeRepas[i];
+  if(!item){return;}
+  repasActifId=item.id;
+  var r=item.r;
   document.getElementById("screen-home").style.display="none";
   document.getElementById("screen-repas").style.display="";
   document.getElementById("titre-repas").textContent=r.nom;
@@ -178,9 +178,9 @@ function entrerRepas(i){
 }
 
 function supprimerRepas(i){
-  var ids=Object.keys(RDB);
-  var id=ids[i];
-  if(confirm("Supprimer ce repas ?")){del("/repas/"+id).then(chargerRepas);}
+  var item=listeRepas[i];
+  if(!item) return;
+  if(confirm("Supprimer ce repas ?")){del("/repas/"+item.id).then(chargerRepas);}
 }
 
 function chargerPlats(){
@@ -205,7 +205,7 @@ function chargerPlats(){
         var n=document.createElement("span"); n.className="row-nom"; n.textContent=p.nom;
         var q=document.createElement("span"); q.className="row-qui"; q.textContent=p.qui;
         var d=document.createElement("button"); d.className="del"; d.textContent="✕";
-        d.onclick=function(){del("/repas/"+repasActifId+"/plats/"+pid).then(chargerPlats);};
+        d.onclick=(function(ppid){return function(){del("/repas/"+repasActifId+"/plats/"+ppid).then(chargerPlats);};})(pid);
         row.appendChild(n); row.appendChild(q); row.appendChild(d);
         sec.appendChild(row);
       });
